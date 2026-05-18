@@ -24,20 +24,6 @@ const ticketsData = [
     description: "O software não está abrindo",
     category: "Software",
   },
-  {
-    id: "4",
-    title: "Problema de Rede",
-    status: "Aberto",
-    description: "Não é possível conectar à internet",
-    category: "Rede",
-  },
-  {
-    id: "5",
-    title: "Erro de Login",
-    status: "Em Progresso",
-    description: "Não é possível fazer login no sistema",
-    category: "Software",
-  },
 ];
 
 export default function Home() {
@@ -62,7 +48,7 @@ export default function Home() {
       },
     ]); // Atualiza o estado dos tickets adicionando o novo ticket ao array existente
   }
-
+ 
   return (
     <main>
       <h1>Chamados</h1>
@@ -70,7 +56,7 @@ export default function Home() {
         (
           ticket, // Renderiza a lista de tickets usando o método map para iterar sobre o array de tickets
         ) => (
-          <div key={ticket.id}>
+          <div className="border p-4 rounded-lg mb-2" key={ticket.id}>
             {/* A propriedade key é importante para ajudar o React a identificar quais itens foram alterados, adicionados ou removidos */}
             <h2>Título: {ticket.title}</h2> {/* Exibe o título do ticket */}
             <p>Status: {ticket.status}</p> {/* Exibe o status do ticket */}
