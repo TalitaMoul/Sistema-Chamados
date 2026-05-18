@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import FormularioChamado from "./components/FormularioChamados"
+import FormularioChamados from "./components/FormularioChamados";
 
 const ticketsData = [
   { id: "1", title: "Impressora Quebrada", status: "Aberto" },
@@ -22,6 +24,7 @@ export default function Home() {
           <p>Status: {ticket.status}</p>
         </div>
       ))}
+      <FormularioChamados />
     </main>
   );
 }
