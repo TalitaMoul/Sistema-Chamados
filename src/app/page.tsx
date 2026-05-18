@@ -48,7 +48,7 @@ export default function Home() {
       },
     ]); // Atualiza o estado dos tickets adicionando o novo ticket ao array existente
   }
-
+ 
   return (
     <main>
       <h1>Chamados</h1>
