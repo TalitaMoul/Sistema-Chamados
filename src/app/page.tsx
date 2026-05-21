@@ -1,37 +1,23 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FormularioChamados from "./components/FormularioChamados";
-
-const ticketsData = [
-  {
-    id: "1",
-    title: "Impressora Quebrada",
-    status: "Aberto",
-    description: "A impressora não está imprimindo",
-    category: "Hardware",
-  },
-  {
-    id: "2",
-    title: "Computador Lento",
-    status: "Em Progresso",
-    description: "O computador está lento ao abrir programas",
-    category: "Hardware",
-  },
-  {
-    id: "3",
-    title: "Software Não Funciona",
-    status: "Fechado ",
-    description: "O software não está abrindo",
-    category: "Software",
-  },
-];
+import { supabase } from "./lib/supabase";
 
 export default function Home() {
-  const [tickets, setTickets] = useState(ticketsData); // Estado para armazenar os tickets
+  const [tickets, setTickets] = useState<any[]>([]); // Estado para armazenar a lista de tickets, inicializado como um array vazio
+
+  useEffect(() => {
+    // Use o useEffect para buscar os tickets do banco de dados quando o componente for montado
+    async function fetchTickets() {
+      const { data } = await supabase.from("tickets").select("*"); // Faz uma consulta à tabela "tickets" no Supabase para obter todos os tickets
+      if (data) setTickets(data); // Se os dados forem retornados com sucesso, atualiza o estado dos tickets com os dados obtidos do banco de dados
+    }
+    fetchTickets(); // Chama a função fetchTickets para iniciar a busca dos tickets quando o componente for montado
+  }, []);
 
   function onSave(newTicket: {
     id: number;
-    titulo: string;
+    title: string;
     status: string;
     description?: string;
     category?: string;
@@ -41,12 +27,30 @@ export default function Home() {
       ...tickets, // Usa o operador spread para manter os tickets existentes no estado
       {
         id: String(newTicket.id), // Converte o ID para string para manter a consistência com os IDs dos tickets existentes
-        title: newTicket.titulo, // Usa o título do novo ticket
+        title: newTicket.title, // Usa o título do novo ticket
         status: newTicket.status, // Usa o status do novo ticket
         description: newTicket.description ?? "", // Usa o operador de coalescência nula para garantir que a descrição seja uma string, mesmo que seja undefined
         category: newTicket.category ?? "", // Usa o operador de coalescência nula para garantir que a categoria seja uma string, mesmo que seja undefined
       },
     ]); // Atualiza o estado dos tickets adicionando o novo ticket ao array existente
+  }
+
+  async function updateStatus(id: number, newStatus: string) {
+    // Função para atualizar o status de um ticket
+    const { error } = await supabase
+      .from("tickets") // Especifica a tabela "tickets" para a operação de atualização
+      .update({ status: newStatus }) // Define o novo status para o ticket
+      .eq("id", id); // Especifica a condição para identificar o ticket a ser atualizado, comparando o ID do ticket com o ID fornecido
+
+    if (error) {
+      alert("Erro ao atualizar status: " + error.message); // Exibe um alerta com a mensagem de erro retornada pelo Supabase, caso ocorra um erro durante a atualização
+      return; // Encerra a função updateStatus para evitar que o código continue executando após um erro
+    }
+    setTickets(
+      // Atualiza o estado dos tickets para refletir a mudança de status
+      tickets.map((t) => (t.id === id ? { ...t, status: newStatus } : t)), // Usa o método map para iterar sobre os tickets existentes
+      //  e atualizar o status do ticket que corresponde ao ID fornecido, mantendo os outros tickets inalterados
+    );
   }
 
   return (
@@ -64,6 +68,14 @@ export default function Home() {
             {/* Exibe a descrição do ticket */}
             <p>Categoria: {ticket.category}</p>{" "}
             {/* Exibe a categoria do ticket */}
+            <select
+              value={ticket.status}
+              onChange={(e) => updateStatus(ticket.id, e.target.value)}
+            >
+              <option value="Aberto">Aberto</option>
+              <option value="Em andamento">Em andamento</option>
+              <option value="Resolvido">Resolvido</option>
+            </select>
           </div>
         ),
       )}
